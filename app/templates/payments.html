@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Payments · ZR Fabrication{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <h1>Payments</h1>
+    <p>Record cash or bank collections against a customer or a specific bill.</p>
+  </div>
+</section>
+
+<section class="grid-2">
+  <div class="panel">
+    <h2>Record payment</h2>
+    <form class="form" method="post">
+      <label>Customer
+        <select name="customer_id" id="pay-customer" required>
+          <option value="">Select customer</option>
+          {% for c in customers %}
+          <option value="{{ c.id }}">{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Link to bill (optional)
+        <select name="bill_id" id="pay-bill">
+          <option value="">General payment</option>
+          {% for b in open_bills %}
+          <option value="{{ b.id }}" data-customer="{{ b.customer_id }}">
+            {{ b.bill_no }} — {{ b.customer_name }} (due {{ '%.2f'|format(b.due) }})
+          </option>
+          {% endfor %}
+        </select>
+      </label>
+      <div class="form-row">
+        <label>Amount (Rs)
+          <input type="number" name="amount" step="0.01" min="0.01" required>
+        </label>
+        <label>Date
+          <input type="date" name="payment_date" value="{{ today }}" required>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>Method
+          <select name="method">
+            <option>Cash</option>
+            <option>Bank</option>
+            <option>JazzCash</option>
+            <option>EasyPaisa</option>
+            <option>Cheque</option>
+          </select>
+        </label>
+        <label>Notes
+          <input name="notes" placeholder="Receipt / reference">
+        </label>
+      </div>
+      <button class="btn btn-accent" type="submit">Save payment</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h2>Recent payments</h2>
+    {% if payments %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Customer</th>
+            <th class="num">Amount</th>
+            <th>Bill</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in payments %}
+          <tr>
+            <td>{{ p.payment_date }}</td>
+            <td>{{ p.customer_name }}</td>
+            <td class="num">{{ '%.2f'|format(p.amount) }}</td>
+            <td class="mono">{{ p.bill_no or 'General' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty">No payments yet.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const customer = document.getElementById("pay-customer");
+  const bill = document.getElementById("pay-bill");
+  const options = [...bill.querySelectorAll("option[data-customer]")];
+
+  function filterBills() {
+    const cid = customer.value;
+    options.forEach((opt) => {
+      opt.hidden = cid && opt.dataset.customer !== cid;
+    });
+    if (bill.selectedOptions[0] && bill.selectedOptions[0].hidden) {
+      bill.value = "";
+    }
+  }
+  customer.addEventListener("change", filterBills);
+  filterBills();
+})();
+</script>
+{% endblock %}

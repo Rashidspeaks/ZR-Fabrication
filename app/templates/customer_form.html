@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · ZR Fabrication{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <h1>{{ title }}</h1>
+    <p>Keep phone and address handy for delivery and credit follow-up.</p>
+  </div>
+</section>
+
+<div class="panel">
+  <form class="form" method="post">
+    <label>Name
+      <input name="name" required value="{{ customer.name if customer else '' }}">
+    </label>
+    <div class="form-row">
+      <label>Phone
+        <input name="phone" value="{{ customer.phone if customer else '' }}">
+      </label>
+      <label>Address
+        <input name="address" value="{{ customer.address if customer else '' }}">
+      </label>
+    </div>
+    <label>Notes
+      <textarea name="notes">{{ customer.notes if customer else '' }}</textarea>
+    </label>
+    <div class="actions">
+      <button class="btn btn-accent" type="submit">Save</button>
+      <a class="btn btn-ghost" href="{{ url_for('main.customers') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

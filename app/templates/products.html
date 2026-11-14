@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Products · ZR Fabrication{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <h1>Products</h1>
+    <p>Iron stock and fabrication services with default rates (edit per bill as needed).</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-accent" href="{{ url_for('main.product_new') }}">Add product</a>
+    {% if show_all %}
+    <a class="btn btn-ghost" href="{{ url_for('main.products') }}">Active only</a>
+    {% else %}
+    <a class="btn btn-ghost" href="{{ url_for('main.products', all=1) }}">Show inactive</a>
+    {% endif %}
+  </div>
+</section>
+
+<div class="panel">
+  {% if products %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Unit</th>
+          <th class="num">Rate (Rs)</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+        <tr>
+          <td>
+            <strong>{{ p.name }}</strong>
+            {% if p.description %}<div class="muted">{{ p.description }}</div>{% endif %}
+          </td>
+          <td>{{ p.category }}</td>
+          <td>{{ p.unit }}</td>
+          <td class="num">{{ '%.2f'|format(p.rate) }}</td>
+          <td>{{ 'Active' if p.active else 'Inactive' }}</td>
+          <td><a class="btn btn-sm btn-ghost" href="{{ url_for('main.product_edit', product_id=p.id) }}">Edit</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No products yet.</p>
+  {% endif %}
+</div>
+{% endblock %}
