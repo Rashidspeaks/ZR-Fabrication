@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ZR Fabrication{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@500;600&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">ZR Fabrication</div>
+        <div class="brand-sub">Iron store bill ledger</div>
+      </div>
+      <nav class="nav">
+        <a href="{{ url_for('main.index') }}" class="{{ 'active' if request.endpoint == 'main.index' else '' }}">Dashboard</a>
+        <a href="{{ url_for('main.bills') }}" class="{{ 'active' if request.endpoint and 'bill' in request.endpoint else '' }}">Bills</a>
+        <a href="{{ url_for('main.customers') }}" class="{{ 'active' if request.endpoint and 'customer' in request.endpoint else '' }}">Customers</a>
+        <a href="{{ url_for('main.products') }}" class="{{ 'active' if request.endpoint and 'product' in request.endpoint else '' }}">Products</a>
+        <a href="{{ url_for('main.payments') }}" class="{{ 'active' if request.endpoint == 'main.payments' else '' }}">Payments</a>
+        <a href="{{ url_for('main.ledger') }}" class="{{ 'active' if request.endpoint == 'main.ledger' else '' }}">Ledger</a>
+      </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-wrap">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+
+    <p class="footer-note">ZR Fabrication · amounts in PKR (Rs)</p>
+  </div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

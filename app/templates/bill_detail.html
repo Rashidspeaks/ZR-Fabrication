@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}{{ bill.bill_no }} · ZR Fabrication{% endblock %}
+{% block content %}
+<section class="page-head no-print">
+  <div>
+    <h1>{{ bill.bill_no }}</h1>
+    <p>
+      <span class="badge badge-{{ bill.status|lower }}">{{ bill.status }}</span>
+      · Due Rs {{ '%.2f'|format(bill.due) }}
+    </p>
+  </div>
+  <div class="actions">
+    <button class="btn btn-accent" type="button" onclick="window.print()">Print</button>
+    <a class="btn btn-ghost" href="{{ url_for('main.payments') }}">Record payment</a>
+    <form method="post" action="{{ url_for('main.bill_delete', bill_id=bill.id) }}"
+          onsubmit="return confirm('Delete this bill and its linked payments?');">
+      <button class="btn btn-danger" type="submit">Delete</button>
+    </form>
+  </div>
+</section>
+
+<article class="bill-sheet">
+  <div class="bill-header">
+    <div>
+      <div class="brand-mark" style="font-size:2rem">ZR Fabrication</div>
+      <div class="brand-sub">Iron · Steel · Fabrication</div>
+      <p class="muted" style="margin:0.75rem 0 0">
+        Bill to<br>
+        <strong>{{ bill.customer_name }}</strong><br>
+        {% if bill.customer_phone %}{{ bill.customer_phone }}<br>{% endif %}
+        {% if bill.customer_address %}{{ bill.customer_address }}{% endif %}
+      </p>
+    </div>
+    <div class="bill-meta">
+      <div><strong>{{ bill.bill_no }}</strong></div>
+      <div>Date: {{ bill.bill_date }}</div>
+      {% if bill.notes %}<div class="muted">{{ bill.notes }}</div>{% endif %}
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Description</th>
+          <th>Unit</th>
+          <th class="num">Qty</th>
+          <th class="num">Rate</th>
+          <th class="num">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ item.description }}</td>
+          <td>{{ item.unit }}</td>
+          <td class="num">{{ '%.3f'|format(item.quantity) }}</td>
+          <td class="num">{{ '%.2f'|format(item.rate) }}</td>
+          <td class="num">{{ '%.2f'|format(item.amount) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="totals">
+    <div><span>Subtotal</span><span>Rs {{ '%.2f'|format(bill.subtotal) }}</span></div>
+    <div><span>Discount</span><span>Rs {{ '%.2f'|format(bill.discount) }}</span></div>
+    <div class="grand"><span>Total</span><span>Rs {{ '%.2f'|format(bill.total) }}</span></div>
+    <div><span>Paid</span><span>Rs {{ '%.2f'|format(bill.paid) }}</span></div>
+    <div class="grand"><span>Balance due</span><span>Rs {{ '%.2f'|format(bill.due) }}</span></div>
+  </div>
+
+  {% if payments %}
+  <h3 style="margin-top:1.5rem">Payments on this bill</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Method</th>
+          <th class="num">Amount</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in payments %}
+        <tr>
+          <td>{{ p.payment_date }}</td>
+          <td>{{ p.method }}</td>
+          <td class="num">{{ '%.2f'|format(p.amount) }}</td>
+          <td>{{ p.notes or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</article>
+{% endblock %}

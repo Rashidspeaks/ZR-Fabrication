@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Bills · ZR Fabrication{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <h1>Bills</h1>
+    <p>All iron and fabrication invoices with payment status.</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-accent" href="{{ url_for('main.bill_new') }}">New bill</a>
+  </div>
+</section>
+
+<form class="search-bar" method="get">
+  <input type="search" name="q" value="{{ q }}" placeholder="Bill no or customer">
+  <select name="status">
+    <option value="">All statuses</option>
+    <option value="Unpaid" {% if status_filter == 'Unpaid' %}selected{% endif %}>Unpaid</option>
+    <option value="Partial" {% if status_filter == 'Partial' %}selected{% endif %}>Partial</option>
+    <option value="Paid" {% if status_filter == 'Paid' %}selected{% endif %}>Paid</option>
+  </select>
+  <button class="btn btn-sm" type="submit">Filter</button>
+</form>
+
+<div class="panel">
+  {% if bills %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Bill</th>
+          <th>Date</th>
+          <th>Customer</th>
+          <th class="num">Total</th>
+          <th class="num">Paid</th>
+          <th class="num">Due</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in bills %}
+        <tr>
+          <td class="mono"><a href="{{ url_for('main.bill_detail', bill_id=b.id) }}">{{ b.bill_no }}</a></td>
+          <td>{{ b.bill_date }}</td>
+          <td>{{ b.customer_name }}</td>
+          <td class="num">{{ '%.2f'|format(b.total) }}</td>
+          <td class="num">{{ '%.2f'|format(b.paid) }}</td>
+          <td class="num">{{ '%.2f'|format(b.due) }}</td>
+          <td><span class="badge badge-{{ b.status|lower }}">{{ b.status }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No bills match this filter.</p>
+  {% endif %}
+</div>
+{% endblock %}

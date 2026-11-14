@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}New bill · ZR Fabrication{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <h1>New bill</h1>
+    <p>Next number: <span class="mono">{{ bill_no }}</span>. Pick products or type custom iron lines.</p>
+  </div>
+</section>
+
+<div class="panel">
+  <form class="form form-wide" method="post" id="bill-form">
+    <div class="form-row-3">
+      <label>Customer
+        <select name="customer_id" required>
+          <option value="">Select customer</option>
+          {% for c in customers %}
+          <option value="{{ c.id }}" {% if form and form.customer_id == c.id|string %}selected{% endif %}>{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Bill date
+        <input type="date" name="bill_date" value="{{ form.bill_date if form and form.bill_date else today }}" required>
+      </label>
+      <label>Discount (Rs)
+        <input type="number" step="0.01" min="0" name="discount" value="{{ form.discount if form and form.discount else '0' }}">
+      </label>
+    </div>
+
+    <label>Notes
+      <input name="notes" value="{{ form.notes if form else '' }}" placeholder="Delivery, size notes, PO ref…">
+    </label>
+
+    <h3>Line items</h3>
+    <div class="table-wrap">
+      <table class="line-items" id="lines">
+        <thead>
+          <tr>
+            <th style="width:28%">Product</th>
+            <th>Description</th>
+            <th style="width:8%">Unit</th>
+            <th style="width:10%" class="num">Qty</th>
+            <th style="width:12%" class="num">Rate</th>
+            <th style="width:6%"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in range(4) %}
+          <tr class="line">
+            <td>
+              <select class="product-pick">
+                <option value="">Custom / pick</option>
+                {% for p in products %}
+                <option value="{{ p.id }}"
+                        data-name="{{ p.name }}"
+                        data-unit="{{ p.unit }}"
+                        data-rate="{{ p.rate }}">{{ p.name }} ({{ p.rate }})</option>
+                {% endfor %}
+              </select>
+              <input type="hidden" name="item_product_id" value="">
+            </td>
+            <td><input name="item_description" placeholder="Item description"></td>
+            <td><input name="item_unit" value="kg"></td>
+            <td><input name="item_quantity" type="number" step="0.001" min="0" value=""></td>
+            <td><input name="item_rate" type="number" step="0.01" min="0" value=""></td>
+            <td><button type="button" class="btn btn-sm btn-ghost remove-line">×</button></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="actions" style="margin-top:0.5rem">
+      <button type="button" class="btn btn-ghost btn-sm" id="add-line">Add line</button>
+    </div>
+
+    <div class="form-row" style="margin-top:1rem">
+      <label>Paid now (optional)
+        <input type="number" step="0.01" min="0" name="paid_now" value="0">
+      </label>
+      <label>Payment method
+        <select name="payment_method">
+          <option>Cash</option>
+          <option>Bank</option>
+          <option>JazzCash</option>
+          <option>EasyPaisa</option>
+          <option>Cheque</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-accent" type="submit">Save bill</button>
+      <a class="btn btn-ghost" href="{{ url_for('main.bills') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const tbody = document.querySelector("#lines tbody");
+  const productsHtml = tbody.querySelector(".product-pick").innerHTML;
+
+  function bindRow(row) {
+    const pick = row.querySelector(".product-pick");
+    const pid = row.querySelector("input[name='item_product_id']");
+    const desc = row.querySelector("input[name='item_description']");
+    const unit = row.querySelector("input[name='item_unit']");
+    const rate = row.querySelector("input[name='item_rate']");
+    pick.addEventListener("change", () => {
+      const opt = pick.selectedOptions[0];
+      if (!opt || !opt.value) {
+        pid.value = "";
+        return;
+      }
+      pid.value = opt.value;
+      desc.value = opt.dataset.name || "";
+      unit.value = opt.dataset.unit || "kg";
+      rate.value = opt.dataset.rate || "";
+    });
+    row.querySelector(".remove-line").addEventListener("click", () => {
+      if (tbody.querySelectorAll(".line").length > 1) row.remove();
+    });
+  }
+
+  tbody.querySelectorAll(".line").forEach(bindRow);
+
+  document.getElementById("add-line").addEventListener("click", () => {
+    const row = document.createElement("tr");
+    row.className = "line";
+    row.innerHTML = `
+      <td>
+        <select class="product-pick">${productsHtml}</select>
+        <input type="hidden" name="item_product_id" value="">
+      </td>
+      <td><input name="item_description" placeholder="Item description"></td>
+      <td><input name="item_unit" value="kg"></td>
+      <td><input name="item_quantity" type="number" step="0.001" min="0" value=""></td>
+      <td><input name="item_rate" type="number" step="0.01" min="0" value=""></td>
+      <td><button type="button" class="btn btn-sm btn-ghost remove-line">×</button></td>`;
+    tbody.appendChild(row);
+    bindRow(row);
+  });
+})();
+</script>
+{% endblock %}

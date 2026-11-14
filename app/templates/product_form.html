@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · ZR Fabrication{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <h1>{{ title }}</h1>
+    <p>Use kg, ft, pcs, job, or trip — rates can still be overridden on each bill.</p>
+  </div>
+</section>
+
+<div class="panel">
+  <form class="form" method="post">
+    <label>Name
+      <input name="name" required value="{{ product.name if product else '' }}">
+    </label>
+    <div class="form-row-3">
+      <label>Category
+        <input name="category" list="categories" value="{{ product.category if product else 'Iron' }}">
+        <datalist id="categories">
+          <option value="Angle"><option value="Channel"><option value="Pipe">
+          <option value="Bar"><option value="Flat"><option value="Sheet">
+          <option value="Service"><option value="Iron">
+        </datalist>
+      </label>
+      <label>Unit
+        <input name="unit" list="units" value="{{ product.unit if product else 'kg' }}">
+        <datalist id="units">
+          <option value="kg"><option value="ft"><option value="pcs">
+          <option value="job"><option value="trip"><option value="sheet">
+        </datalist>
+      </label>
+      <label>Rate (Rs)
+        <input name="rate" type="number" step="0.01" min="0" value="{{ product.rate if product else '0' }}">
+      </label>
+    </div>
+    <label>Description
+      <textarea name="description">{{ product.description if product else '' }}</textarea>
+    </label>
+    {% if product and product.id %}
+    <label>
+      <span>Active</span>
+      <select name="active">
+        <option value="1" {% if product.active %}selected{% endif %}>Yes</option>
+        <option value="0" {% if not product.active %}selected{% endif %}>No</option>
+      </select>
+    </label>
+    {% endif %}
+    <div class="actions">
+      <button class="btn btn-accent" type="submit">Save</button>
+      <a class="btn btn-ghost" href="{{ url_for('main.products') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

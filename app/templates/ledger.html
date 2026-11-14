@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Ledger · ZR Fabrication{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <h1>Customer ledger</h1>
+    <p>Running balances across all billed iron and fabrication work.</p>
+  </div>
+  <div class="actions">
+    <button class="btn btn-ghost" type="button" onclick="window.print()">Print</button>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="stat">
+    <div class="stat-label">Accounts</div>
+    <div class="stat-value">{{ rows|length }}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Total receivable</div>
+    <div class="stat-value">Rs {{ '%.2f'|format(total_due) }}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Customer credit</div>
+    <div class="stat-value">Rs {{ '%.2f'|format(total_credit) }}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Net outstanding</div>
+    <div class="stat-value">Rs {{ '%.2f'|format(total_due - total_credit) }}</div>
+  </div>
+</section>
+
+<div class="panel">
+  {% if rows %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Phone</th>
+          <th class="num">Billed</th>
+          <th class="num">Paid</th>
+          <th class="num">Balance</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td><a href="{{ url_for('main.customer_detail', customer_id=r.id) }}">{{ r.name }}</a></td>
+          <td>{{ r.phone or '—' }}</td>
+          <td class="num">{{ '%.2f'|format(r.billed) }}</td>
+          <td class="num">{{ '%.2f'|format(r.paid) }}</td>
+          <td class="num {% if r.balance > 0 %}due-pos{% elif r.balance < 0 %}credit{% else %}due-zero{% endif %}">
+            {{ '%.2f'|format(r.balance) }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">Ledger is empty. Create bills to populate balances.</p>
+  {% endif %}
+</div>
+{% endblock %}

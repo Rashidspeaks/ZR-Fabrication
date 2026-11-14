@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Customers · ZR Fabrication{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <h1>Customers</h1>
+    <p>Buyers, fabricators, and walk-in accounts linked to the ledger.</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-accent" href="{{ url_for('main.customer_new') }}">Add customer</a>
+  </div>
+</section>
+
+<form class="search-bar" method="get">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search name, phone, address">
+  <button class="btn btn-sm" type="submit">Search</button>
+</form>
+
+<div class="panel">
+  {% if customers %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Address</th>
+          <th class="num">Billed</th>
+          <th class="num">Paid</th>
+          <th class="num">Balance</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in customers %}
+        <tr>
+          <td><a href="{{ url_for('main.customer_detail', customer_id=c.id) }}">{{ c.name }}</a></td>
+          <td>{{ c.phone or '—' }}</td>
+          <td>{{ c.address or '—' }}</td>
+          <td class="num">{{ '%.2f'|format(c.billed) }}</td>
+          <td class="num">{{ '%.2f'|format(c.paid) }}</td>
+          <td class="num {% if c.balance > 0 %}due-pos{% elif c.balance < 0 %}credit{% else %}due-zero{% endif %}">
+            {{ '%.2f'|format(c.balance) }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No customers found.</p>
+  {% endif %}
+</div>
+{% endblock %}
